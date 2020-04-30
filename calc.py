@@ -31,7 +31,8 @@ class Token(object):
 class Interpreter(object):
     def __init__(self, text):
         # client string input, e.g. "3+5"
-        self.text = text
+        self.text = "".join([s for s in text if not s.isspace()])
+
         # self.pos is an index into self.text
         self.pos = 0
         # current token instance
@@ -63,11 +64,20 @@ class Interpreter(object):
         # index to point to the next character after the digit,
         # and return the INTEGER token
         if current_char.isdigit():
-            token = Token(INTEGER, int(current_char))
-            self.pos += 1
-            return token
+            digit = ''
+            while True:
+                digit += current_char
+                self.pos +=1
+                if not self.pos > len(text) - 1:
+                    current_char = text[self.pos]
+                else:
+                    break
+                if not current_char.isdigit():
+                    break 
 
-        if current_char == '+':
+            return Token(INTEGER, int(digit))
+
+        if current_char == '-':
             token = Token(PLUS, current_char)
             self.pos += 1
             return token
@@ -88,8 +98,9 @@ class Interpreter(object):
         """expr -> INTEGER PLUS INTEGER"""
         # set current token to the first token taken from the input
         self.current_token = self.get_next_token()
-
+        
         # we expect the current token to be a single-digit integer
+
         left = self.current_token
         self.eat(INTEGER)
 
@@ -102,12 +113,12 @@ class Interpreter(object):
         self.eat(INTEGER)
         # after the above call the self.current_token is set to
         # EOF token
-
+        self.eat(EOF)
         # at this point INTEGER PLUS INTEGER sequence of tokens
         # has been successfully found and the method can just
         # return the result of adding two integers, thus
         # effectively interpreting client input
-        result = left.value + right.value
+        result = left.value - right.value
         return result
 
 
@@ -116,7 +127,7 @@ def main():
         try:
             # To run under Python3 replace 'raw_input' call
             # with 'input'
-            text = raw_input('calc> ')
+            text = input('calc> ')
         except EOFError:
             break
         if not text:
