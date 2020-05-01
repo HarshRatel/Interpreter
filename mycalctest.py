@@ -3,7 +3,8 @@ import mycalc as i
 
 class InterpreterTests(unittest.TestCase):
     def test_token_parse(self):
-        expressions = {'2+2' : 4,
+        expressions = { '3' : 3,
+                        '2+2' : 4,
                         '1235 + 123' : 1235 + 123,
                         '44239 - 523' : 44239 - 523}
         
