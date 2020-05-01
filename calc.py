@@ -2,7 +2,7 @@
 #
 # EOF (end-of-file) token is used to indicate that
 # there is no more input left for lexical analysis
-INTEGER, PLUS, EOF = 'INTEGER', 'PLUS', 'EOF'
+INTEGER, PLUS, MINUS, MUL, DIV, EOF = 'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', 'EOF'
 
 
 class Token(object):
@@ -37,10 +37,18 @@ class Interpreter(object):
         self.pos = 0
         # current token instance
         self.current_token = None
+        self.current_char = self.text[self.pos]
 
     def error(self):
         raise Exception('Error parsing input')
-
+    
+    def step(self):
+        self.pos += 1
+        if self.pos < len(self.text):
+            self.current_char = self.text[self.pos]
+        else:
+            self.current_char = None
+            
     def get_next_token(self):
         """Lexical analyzer (also known as scanner or tokenizer)
 
@@ -57,29 +65,38 @@ class Interpreter(object):
 
         # get a character at the position self.pos and decide
         # what token to create based on the single character
-        current_char = text[self.pos]
+        self.current_char
 
         # if the character is a digit then convert it to
         # integer, create an INTEGER token, increment self.pos
         # index to point to the next character after the digit,
         # and return the INTEGER token
-        if current_char.isdigit():
+        if self.current_char.isdigit():
             digit = ''
-            while True:
-                digit += current_char
-                self.pos +=1
-                if not self.pos > len(text) - 1:
-                    current_char = text[self.pos]
-                else:
-                    break
-                if not current_char.isdigit():
-                    break 
+            while self.current_char is not None and self.current_char.isdigit():
+                digit += self.current_char
+                self.step()
 
             return Token(INTEGER, int(digit))
 
-        if current_char == '-':
-            token = Token(PLUS, current_char)
-            self.pos += 1
+        if self.current_char == '-':
+            token = Token(MINUS, self.current_char)
+            self.step()
+            return token
+
+        if self.current_char == '+':
+            token = Token(PLUS, self.current_char)
+            self.step()
+            return token
+
+        if self.current_char == '*':
+            token = Token(MUL, self.current_char)
+            self.step()
+            return token
+
+        if self.current_char == '/':
+            token = Token(DIV, self.current_char)
+            self.step()
             return token
 
         self.error()
@@ -106,27 +123,34 @@ class Interpreter(object):
 
         # we expect the current token to be a '+' token
         op = self.current_token
-        self.eat(PLUS)
+        if op.type is PLUS:
+            self.eat(PLUS)
+        elif op.type is MINUS:
+            self.eat(MINUS)
+        elif op.type is MUL:
+            self.eat(MUL)
+        elif op.type is DIV:
+            self.eat(DIV)
 
-        # we expect the current token to be a single-digit integer
         right = self.current_token
         self.eat(INTEGER)
-        # after the above call the self.current_token is set to
-        # EOF token
         self.eat(EOF)
-        # at this point INTEGER PLUS INTEGER sequence of tokens
-        # has been successfully found and the method can just
-        # return the result of adding two integers, thus
-        # effectively interpreting client input
-        result = left.value - right.value
+
+        if op.type is PLUS:
+            result = left.value + right.value
+        elif op.type is MINUS:
+            result = left.value - right.value
+        elif op.type is MUL:
+            result = left.value * right.value
+        elif op.type is DIV:
+            result = left.value / right.value
+
         return result
 
 
 def main():
     while True:
         try:
-            # To run under Python3 replace 'raw_input' call
-            # with 'input'
             text = input('calc> ')
         except EOFError:
             break
