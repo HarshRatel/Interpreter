@@ -34,7 +34,7 @@ class Interpreter():
             digit += self.current_char
             self.step()
 
-        return digit
+        return int(digit)
 
     def get_token(self):
         if self.current_char is None:
@@ -55,6 +55,28 @@ class Interpreter():
             self.step()
             return self.current_token
 
+    def eat(self, right):
+        if self.current_token.type == right:
+            self.get_token()
+        else:
+            self.error()
+
     def expr(self):
-        while self.get_token().type is not EOF:
-            print(self.current_token)
+        result = self.get_token().val
+        self.eat(INT)
+
+        while self.current_token.type is not EOF:
+            if self.current_token.val == '+':
+                self.eat(SUM)
+                right = self.current_token.val
+                self.eat(INT)
+                result += right
+            elif self.current_token.val == '-':
+                self.eat(MIN)
+                right = self.current_token.val
+                self.eat(INT)   
+                result -= right
+            else:
+                self.error()
+        
+        return result
