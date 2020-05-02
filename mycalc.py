@@ -1,4 +1,4 @@
-INT, EOF, SUM, MIN, DIV, MUL = 'INT', 'EOF', 'SUM', 'MIN', 'DIV', 'MUL'
+INT, EOF, SUM, MIN, DIV, MUL, LPAR, RPAR = 'INT', 'EOF', 'SUM', 'MIN', 'DIV', 'MUL', 'LPAR', 'RPAR' 
 
 class Token():
     def __init__(self, token_type, val = None):
@@ -13,17 +13,9 @@ class Token():
 
 class Lexer():
     def __init__(self, code : str):
-        self.code = code
-
-class Interpreter():
-    def __init__(self, code : str):
         self.code = "".join([s for s in code if s != ' '])
         self.pos = 0
         self.current_char = self.code[self.pos]
-        self.current_token = self.get_token()
-
-    def error(self):
-        raise Exception("Failed parse input")
 
     def step(self):
         self.pos += 1
@@ -69,16 +61,42 @@ class Interpreter():
             self.step()
             return self.current_token
 
+        if self.current_char == '(':
+            self.current_token = Token(LPAR, '(')
+            self.step()
+            return self.current_token
+
+        if self.current_char == ')':
+            self.current_token = Token(RPAR, ')')
+            self.step()
+            return self.current_token
+
+        self.error()
+
+class Interpreter():
+    def __init__(self, code : str):
+        self.lexer = Lexer(code)
+        self.current_token = self.lexer.get_token()
+        
+    def error(self):
+        raise Exception("Failed parse input")
+
     def eat(self, right):
         if self.current_token.type == right:
-            self.get_token()
+            self.current_token = self.lexer.get_token()
         else:
             self.error()
 
     def factor(self):
-        result = self.current_token.val
-        self.eat(INT)
-        return result
+        if self.current_token.type == INT:
+            result = self.current_token.val
+            self.eat(INT)
+            return result
+        elif self.current_token.type == LPAR:
+            self.eat(LPAR)
+            result = self.expr()
+            self.eat(RPAR)
+            return result
 
     def term(self):
         result = self.factor()
