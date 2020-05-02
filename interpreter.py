@@ -17,6 +17,12 @@ class Interpreter(TreeProcesser):
         tree = self.parser.parse()
         
         return self.process(tree)
+    
+    def process_UniNode(self, node):
+        if node.op.type == SUM:
+            return self.process(node.expr)
+        elif node.op.type == MIN:
+            return -1 * self.process(node.expr)
 
     def process_OpNode(self, node):
         if node.token.type == SUM:

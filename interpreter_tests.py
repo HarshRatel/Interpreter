@@ -3,7 +3,8 @@ import interpreter as i
 
 class InterpreterTests(unittest.TestCase):
     def test_easy_term(self):
-        expressions = {'2*2' : 4,
+        expressions = { '-2+-2' : -4,
+                        '2*2' : 4,
                         '123 * (1235 + 123)' : 123 * (1235 + 123),
                         '44239 / 523' : 44239 / 523}
 

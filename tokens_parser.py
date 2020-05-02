@@ -1,6 +1,6 @@
 from token_types import INT, EOF, SUM, MIN, DIV, MUL, LPAR, RPAR
 from lexer import Lexer
-from astree import OpNode, NumNode
+from astree import OpNode, NumNode, UniNode
 
 class Parser():
     def __init__(self, code : str):
@@ -17,7 +17,18 @@ class Parser():
             self.error()
 
     def factor(self):
-        if self.current_token.type == INT:
+        '''
+        factor ::= (PLUS | MINUS) factor | INTEGER | LPAR expression RPAR
+        '''
+        if self.current_token.type == SUM:
+            op = self.current_token
+            self.eat(SUM)
+            return UniNode(op, self.factor())
+        elif self.current_token.type == MIN:
+            op = self.current_token
+            self.eat(MIN)
+            return UniNode(op, self.factor())
+        elif self.current_token.type == INT:
             node = NumNode(self.current_token)
             self.eat(INT)
             return node
@@ -28,6 +39,9 @@ class Parser():
             return node
 
     def term(self):
+        '''
+        term ::= factor ((SUM | MIN) factor)*
+        '''
         node = self.factor()
 
         while self.current_token.type in [MUL, DIV]:
@@ -42,6 +56,9 @@ class Parser():
         return node
 
     def expr(self):
+        '''
+        expr ::= term ((MUL | DIV) term)*
+        '''
         node = self.term()
 
         while self.current_token.type in [SUM, MIN]:
