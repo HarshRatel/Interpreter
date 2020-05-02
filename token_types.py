@@ -1,0 +1,1 @@
+INT, EOF, SUM, MIN, DIV, MUL, LPAR, RPAR = 'INT', 'EOF', 'SUM', 'MIN', 'DIV', 'MUL', 'LPAR', 'RPAR' 

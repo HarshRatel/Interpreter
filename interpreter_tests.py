@@ -1,26 +1,16 @@
 import unittest
-import mycalc as i
+import interpreter as i
 
 class InterpreterTests(unittest.TestCase):
-    def test_token_parse(self):
-        expressions = { '3' : 3,
-                        '2+2' : 4,
-                        '1235 + 123' : 1235 + 123,
-                        '44239 - 523' : 44239 - 523}
-        
-        for exp, val in expressions.items():
-            interpreter = i.Interpreter(exp)
-            while interpreter.lexer.get_token().type is not i.EOF:
-                print(interpreter.current_token)
-
     def test_easy_term(self):
-        expressions = {'2*2' : 4,
+        expressions = { '-2+-2' : -4,
+                        '2*2' : 4,
                         '123 * (1235 + 123)' : 123 * (1235 + 123),
                         '44239 / 523' : 44239 / 523}
 
         for exp, val in expressions.items():
             intrepreter = i.Interpreter(exp)
-            self.assertEqual(intrepreter.expr(), val)
+            self.assertEqual(intrepreter.eval(), val)
 
     def test_easy_expr(self):
         expressions = {'2+2' : 4,
@@ -29,7 +19,7 @@ class InterpreterTests(unittest.TestCase):
 
         for exp, val in expressions.items():
             intrepreter = i.Interpreter(exp)
-            self.assertEqual(intrepreter.expr(), val)
+            self.assertEqual(intrepreter.eval(), val)
 
     def test_complex_expr(self):
         expressions = {'2+2+543-123+(3145+123)-123124' : 2+2+543-123+3145+123-123124,
@@ -38,7 +28,7 @@ class InterpreterTests(unittest.TestCase):
 
         for exp, val in expressions.items():
             intrepreter = i.Interpreter(exp)
-            self.assertEqual(intrepreter.expr(), val)
+            self.assertEqual(intrepreter.eval(), val)
 
 if __name__ == '__main__':
     unittest.main()
