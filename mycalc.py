@@ -1,4 +1,4 @@
-INT, EOF, SUM, MIN = 'INT', 'EOF', 'SUM', 'MIN'
+INT, EOF, SUM, MIN, DIV, MUL, LPAR, RPAR = 'INT', 'EOF', 'SUM', 'MIN', 'DIV', 'MUL', 'LPAR', 'RPAR' 
 
 class Token():
     def __init__(self, token_type, val = None):
@@ -11,15 +11,11 @@ class Token():
     def __repr__(self):
         return self.__str__()
 
-class Interpreter():
+class Lexer():
     def __init__(self, code : str):
         self.code = "".join([s for s in code if s != ' '])
         self.pos = 0
         self.current_char = self.code[self.pos]
-        self.current_token = None
-
-    def error(self):
-        raise Exception("Failed parse input")
 
     def step(self):
         self.pos += 1
@@ -55,28 +51,75 @@ class Interpreter():
             self.step()
             return self.current_token
 
+        if self.current_char == '*':
+            self.current_token = Token(MUL, '*')
+            self.step()
+            return self.current_token
+
+        if self.current_char == '/':
+            self.current_token = Token(DIV, '/')
+            self.step()
+            return self.current_token
+
+        if self.current_char == '(':
+            self.current_token = Token(LPAR, '(')
+            self.step()
+            return self.current_token
+
+        if self.current_char == ')':
+            self.current_token = Token(RPAR, ')')
+            self.step()
+            return self.current_token
+
+        self.error()
+
+class Interpreter():
+    def __init__(self, code : str):
+        self.lexer = Lexer(code)
+        self.current_token = self.lexer.get_token()
+        
+    def error(self):
+        raise Exception("Failed parse input")
+
     def eat(self, right):
         if self.current_token.type == right:
-            self.get_token()
+            self.current_token = self.lexer.get_token()
         else:
             self.error()
 
-    def expr(self):
-        result = self.get_token().val
-        self.eat(INT)
+    def factor(self):
+        if self.current_token.type == INT:
+            result = self.current_token.val
+            self.eat(INT)
+            return result
+        elif self.current_token.type == LPAR:
+            self.eat(LPAR)
+            result = self.expr()
+            self.eat(RPAR)
+            return result
 
-        while self.current_token.type is not EOF:
+    def term(self):
+        result = self.factor()
+
+        while self.current_token.type in [MUL, DIV]:
+            if self.current_token.val == '*':
+                self.eat(MUL)
+                result *= self.factor()
+            elif self.current_token.val == '/':
+                self.eat(DIV)
+                result /= self.factor()
+        
+        return result
+
+    def expr(self):
+        result = self.term()
+
+        while self.current_token.type in [SUM, MIN]:
             if self.current_token.val == '+':
                 self.eat(SUM)
-                right = self.current_token.val
-                self.eat(INT)
-                result += right
+                result += self.term()
             elif self.current_token.val == '-':
                 self.eat(MIN)
-                right = self.current_token.val
-                self.eat(INT)   
-                result -= right
-            else:
-                self.error()
+                result -= self.term()
         
         return result
