@@ -1,7 +1,7 @@
 class Token():
-    def __init__(self, token_type, val = None):
+    def __init__(self, token_type, val=None):
         self.type = token_type
-        self.val =  val
+        self.val = val
 
     def __str__(self):
         return "Token ({}, {})".format(self.type, self.val)

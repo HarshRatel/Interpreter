@@ -1,8 +1,11 @@
 from lexer_tokens import Token
-from token_types import *
+from token_types import INT, SUM, EOF, MIN, DIV,\
+    MUL, LPAR, RPAR, BEGIN, END, \
+    DOT, ID, ASSIGN, SEMI
+
 
 class Lexer():
-    def __init__(self, code : str):
+    def __init__(self, code: str):
         self.code = code
         self.pos = 0
         self.current_char = self.code[self.pos]
@@ -25,18 +28,18 @@ class Lexer():
     def peek(self):
         if self.pos + 1 < len(self.code):
             return self.code[self.pos + 1]
-        
+
         return None
 
     def _id(self):
         res = ''
-        RESERVED_WORDS = {'BEGIN' : Token(BEGIN, BEGIN),
-                            'END' : Token(END, END)}
+        RESERVED_WORDS = {'BEGIN': Token(BEGIN, BEGIN),
+                          'END': Token(END, END)}
 
         while self.current_char is not None and self.current_char.isalnum():
             res += self.current_char
             self.step()
-        
+
         return RESERVED_WORDS.get(res, Token(ID, res))
 
     def get_token(self):
@@ -50,7 +53,7 @@ class Lexer():
         if self.current_char.isdigit():
             self.current_token = Token(INT, self.process_int())
             return self.current_token
-        
+
         if self.current_char.isalpha():
             self.current_token = self._id()
             return self.current_token
@@ -67,7 +70,7 @@ class Lexer():
         if self.current_char == '.':
             self.step()
             return Token(DOT, '.')
-            
+
         if self.current_char == '+':
             self.current_token = Token(SUM, '+')
             self.step()
