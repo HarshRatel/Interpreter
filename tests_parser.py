@@ -1,17 +1,28 @@
 import unittest
 from tokens_parser import Parser
-from astree import OpNode, NumNode
+from astree import OpNode, NumNode, Compound, Assign, Var
 
 def print_tree(node):
-    if isinstance(node, NumNode):
-        print("numnode {}".format(node.val))
+    res = ''
+    if isinstance(node, Compound):
+        for child in node.children:
+            res += print_tree(child)
+    if isinstance(node, Var):
+        res += 'var {}'.format(node.var)
+    elif isinstance(node, Assign):
+        res +='assign {} := {}'.format(node.left.var,\
+                                         print_tree(node.right))
+    elif isinstance(node, NumNode):
+        res += "numnode {}".format(node.val)
     elif isinstance(node, OpNode):
-        print('opnode {}'.format(node.val))
-        print_tree(node.left)
-        print_tree(node.right)
+        res += 'opnode {}'.format(node.val)
+        res += print_tree(node.left)
+        res += print_tree(node.right)
+    
+    return res + '\n'
     
 class ParserTests(unittest.TestCase):
-    def test_complex_expr(self):
+    def _test_complex_expr(self):
         expressions = { '2+2 + 2' : 6,
                         '(2+2)*2' : 8,
                         '2+2+543-123+(3145+123)-123124' : 2+2+543-123+3145+123-123124,
@@ -23,6 +34,20 @@ class ParserTests(unittest.TestCase):
             tree= Parser(exp).parse()
             print_tree(tree)
             print()
+
+    def test_code(self):
+        code = 'BEGIN \
+                    BEGIN \
+                        number := 2; \
+                        a := number; \
+                        b := 10 * a + 10 * number / 4; \
+                        c := a - - b \
+                    END; \
+                    x := 11; \
+                END.'
+        print(code)
+        tree= Parser(code).parse()
+        print(print_tree(tree))
             
 if __name__ == '__main__':
     unittest.main()

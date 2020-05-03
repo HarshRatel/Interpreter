@@ -1,5 +1,5 @@
-INT, EOF, SUM, MIN, DIV, MUL, LPAR, RPAR = 'INT', 'EOF', 'SUM', 'MIN', 'DIV', 'MUL', 'LPAR', 'RPAR' 
-VAR = 'VAR'
+INT, EOF, SUM, MIN, DIV, MUL, LPAR, RPAR = 'INT', 'EOF', 'SUM', 'MIN', \
+                                            'DIV', 'MUL', 'LPAR', 'RPAR'
 BEGIN = 'BEGIN'
 END = 'END'
 DOT = 'DOT'

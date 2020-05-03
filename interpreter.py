@@ -2,7 +2,7 @@ from token_types import INT, EOF, SUM, MIN, DIV, MUL, LPAR, RPAR
 from tokens_parser import Parser
 from astree import OpNode, NumNode
 
-class TreeProcesser():
+class TreeProcessor():
     def __init__(self, code : str):
         self.parser = Parser(code)
     
@@ -12,7 +12,7 @@ class TreeProcesser():
 
         return processor(node)
 
-class Interpreter(TreeProcesser):
+class Interpreter(TreeProcessor):
     def eval(self):
         tree = self.parser.parse()
         

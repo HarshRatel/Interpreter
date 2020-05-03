@@ -13,10 +13,10 @@ def print_tree(node):
 class ParserTests(unittest.TestCase):
     def test_complex_expr(self):
         expressions =   {   
-                            'BEGIN END' : 6,
-                            'BEGIN a := 5; x := 11 END' : 8,
-                            'BEGIN a := 5; x := 11; END' : 2+2+543-123+3145+123-123124,
-                            'BEGIN BEGIN a := 5 END; x := 11 END' : 1235*123 + 123/532 * 123 / 75 -6456,
+                            'BEGIN END.' : 6,
+                            'BEGIN a := 5; x := 11 END.' : 8,
+                            'BEGIN a := 5; x := 11; END.' : 2+2+543-123+3145+123-123124,
+                            'BEGIN BEGIN a := 5 END; x := 11 END.' : 1235*123 + 123/532 * 123 / 75 -6456,
                         }
 
         for exp, val in expressions.items():

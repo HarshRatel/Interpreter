@@ -1,14 +1,16 @@
-from token_types import *
 from lexer import Lexer
 from astree import OpNode, NumNode, UniNode, \
-                    Compound, Assign, Var
+                    Compound, Assign, Var, NoOp
+from token_types import INT, SUM, MIN, DIV,\
+                        MUL, LPAR, RPAR, BEGIN, END, \
+                        DOT, ID, ASSIGN, SEMI
 
 
 class Parser():
     def __init__(self, code: str):
         self.lexer = Lexer(code)
         self.current_token = self.lexer.get_token()
-        
+
     def error(self):
         raise Exception("Failed parse input")
 
@@ -19,9 +21,12 @@ class Parser():
             self.error()
 
     def factor(self):
-        '''
-        factor ::= (PLUS | MINUS) factor | INTEGER | LPAR expression RPAR
-        '''
+        """factor ::= PLUS  factor
+              | MINUS factor
+              | INTEGER
+              | LPAREN expr RPAREN
+              | variable
+        """
         if self.current_token.type == SUM:
             op = self.current_token
             self.eat(SUM)
@@ -39,6 +44,9 @@ class Parser():
             node = self.expr()
             self.eat(RPAR)
             return node
+        else:
+            node = self.variable()
+            return node
 
     def term(self):
         '''
@@ -52,7 +60,7 @@ class Parser():
                 self.eat(MUL)
             elif self.current_token.val == '/':
                 self.eat(DIV)
-                
+
             node = OpNode(node, op, self.factor())
 
         return node
@@ -66,12 +74,12 @@ class Parser():
         while self.current_token.type in [SUM, MIN]:
             op = self.current_token
             if self.current_token.val == '+':
-                self.eat(SUM)           
+                self.eat(SUM)
             elif self.current_token.val == '-':
                 self.eat(MIN)
-            
+
             node = OpNode(node, op, self.term())
-            
+
         return node
 
     def empty(self):
@@ -87,10 +95,10 @@ class Parser():
         assignment ::= variable ASSIGN expr
         '''
         left = self.variable()
-        token = self.current_token()
+        token = self.current_token
         self.eat(ASSIGN)
         right = self.expr()
-        
+
         return Assign(left, token, right)
 
     def statement(self):
@@ -103,7 +111,7 @@ class Parser():
             return self.compound_statement()
         elif self.current_token.type == ID:
             return self.assignment()
-        
+
         return self.empty()
 
     def statement_list(self):
@@ -111,18 +119,18 @@ class Parser():
         statement_list ::= statement | statement ; statement_list
         '''
         node = self.statement()
-        
+
         results = [node]
 
         while self.current_token.type == SEMI:
             self.eat(SEMI)
-            results.append(self.statement)
-        
+            results.append(self.statement())
+
         if self.current_token.type == ID:
             self.error()
 
         return results
-        
+
     def compound_statement(self):
         '''
         compound_statement ::= BEGIN statement_list END
@@ -146,4 +154,4 @@ class Parser():
         return node
 
     def parse(self):
-        return self.expr()
+        return self.program()
