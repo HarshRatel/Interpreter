@@ -24,7 +24,5 @@ class ParserTests(unittest.TestCase):
             print_tree(tree)
             print()
             
-            
-
 if __name__ == '__main__':
     unittest.main()

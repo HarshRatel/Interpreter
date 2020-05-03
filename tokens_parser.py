@@ -1,9 +1,11 @@
-from token_types import INT, EOF, SUM, MIN, DIV, MUL, LPAR, RPAR
+from token_types import *
 from lexer import Lexer
-from astree import OpNode, NumNode, UniNode
+from astree import OpNode, NumNode, UniNode, \
+                    Compound, Assign, Var
+
 
 class Parser():
-    def __init__(self, code : str):
+    def __init__(self, code: str):
         self.lexer = Lexer(code)
         self.current_token = self.lexer.get_token()
         
@@ -70,6 +72,77 @@ class Parser():
             
             node = OpNode(node, op, self.term())
             
+        return node
+
+    def empty(self):
+        return NoOp()
+
+    def variable(self):
+        node = Var(self.current_token)
+        self.eat(ID)
+        return node
+
+    def assignment(self):
+        '''
+        assignment ::= variable ASSIGN expr
+        '''
+        left = self.variable()
+        token = self.current_token()
+        self.eat(ASSIGN)
+        right = self.expr()
+        
+        return Assign(left, token, right)
+
+    def statement(self):
+        '''
+         statement ::=  compound_statement
+                        | assignment
+                        | empty
+        '''
+        if self.current_token.type == BEGIN:
+            return self.compound_statement()
+        elif self.current_token.type == ID:
+            return self.assignment()
+        
+        return self.empty()
+
+    def statement_list(self):
+        '''
+        statement_list ::= statement | statement ; statement_list
+        '''
+        node = self.statement()
+        
+        results = [node]
+
+        while self.current_token.type == SEMI:
+            self.eat(SEMI)
+            results.append(self.statement)
+        
+        if self.current_token.type == ID:
+            self.error()
+
+        return results
+        
+    def compound_statement(self):
+        '''
+        compound_statement ::= BEGIN statement_list END
+        '''
+        root = Compound()
+        self.eat(BEGIN)
+        nodes = self.statement_list()
+        self.eat(END)
+
+        for node in nodes:
+            root.children.append(node)
+
+        return root
+
+    def program(self):
+        '''
+        program ::= compound_statement DOT
+        '''
+        node = self.compound_statement()
+        self.eat(DOT)
         return node
 
     def parse(self):

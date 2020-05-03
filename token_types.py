@@ -1,1 +1,8 @@
 INT, EOF, SUM, MIN, DIV, MUL, LPAR, RPAR = 'INT', 'EOF', 'SUM', 'MIN', 'DIV', 'MUL', 'LPAR', 'RPAR' 
+VAR = 'VAR'
+BEGIN = 'BEGIN'
+END = 'END'
+DOT = 'DOT'
+ID = 'ID'
+ASSIGN = ':='
+SEMI = ';'

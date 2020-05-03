@@ -19,3 +19,21 @@ class UniNode(ASTNode):
     def __init__(self, token, expr):
         self.op = token
         self.expr = expr
+
+class Compound(ASTNode):
+    def __init__(self):
+        self.children = []
+
+class Assign(ASTNode):
+    def __init__(self, left, op, right):
+        self.left = left
+        self.token = op
+        self.right = right    
+
+class Var(ASTNode):
+    def __init__(self, token):
+        self.var = token.val
+
+class NoOp(ASTNode):
+    def __init__(self):
+        pass
